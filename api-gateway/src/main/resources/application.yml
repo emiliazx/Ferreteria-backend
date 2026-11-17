@@ -42,6 +42,10 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/pedidos/**
+        - id: notification-service
+          uri: lb://notificaciones
+          predicates:
+            - Path=/api/notificaciones/**
 
 eureka:
   client:

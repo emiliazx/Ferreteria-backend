@@ -88,6 +88,24 @@ services:
     networks:
       - ferreteria-net
 
+  notificaciones:
+    build: ./notificaciones
+    container_name: ferreteria-notificaciones
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ferreteria_notification?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ferreteria-net
+
   api-gateway:
     build: ./api-gateway
     container_name: ferreteria-gateway
@@ -101,6 +119,7 @@ services:
       - auth-service
       - product-service
       - order-service
+      - notificaciones
     networks:
       - ferreteria-net
 
