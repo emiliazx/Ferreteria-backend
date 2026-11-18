@@ -30,18 +30,6 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
-        - id: product-service-productos
-          uri: lb://product-service
-          predicates:
-            - Path=/api/productos/**
-        - id: product-service-categorias
-          uri: lb://product-service
-          predicates:
-            - Path=/api/categorias/**
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/api/pedidos/**
         - id: notification-service
           uri: lb://notificaciones
           predicates:

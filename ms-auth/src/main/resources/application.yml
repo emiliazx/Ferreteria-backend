@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     open-in-view: false
     properties:
       hibernate:
@@ -29,10 +29,14 @@ eureka:
 
 jwt:
   secret: ${JWT_SECRET:FerreteriaMaestrosSecretKey2026MuySeguraParaJWTHS256Tokens}
-  expiration-ms: 86400000
-
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+  info:
+    title: Auth Service
+    description: Microservicio de autenticación
+    version: 1.0.0
