@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -29,8 +30,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        HttpMethod httpMethod = exchange.getRequest().getMethod();
+        String method = httpMethod != null ? httpMethod.name() : "";
 
-        if (isPublic(path, exchange.getRequest().getMethod().name())) {
+        if (isPublic(path, method)) {
             return chain.filter(exchange);
         }
 
@@ -40,7 +43,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7).trim();
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
@@ -63,7 +66,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private boolean isPublic(String path, String method) {
         if ("OPTIONS".equalsIgnoreCase(method)) return true;
-        if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) return true;
+        if (path.startsWith("/api/auth/login")
+                || path.startsWith("/api/auth/register")
+                || path.startsWith("/api/auth/reset-password")) {
+            return true;
+        }
         if (path.startsWith("/api/notificaciones")) return true;
         if ("GET".equalsIgnoreCase(method) && (path.startsWith("/api/productos") || path.startsWith("/api/categorias"))) {
             return true;

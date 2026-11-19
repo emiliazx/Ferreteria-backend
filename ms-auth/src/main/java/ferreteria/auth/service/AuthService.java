@@ -61,4 +61,17 @@ public class AuthService {
         return new UsuarioResponse(usuario.getId(), usuario.getEmail(), usuario.getNombre(),
                 usuario.getRol(), usuario.getActivo());
     }
+   public void resetPassword(ResetPasswordRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail().trim())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No existe una cuenta registrada con ese correo"));
+
+        if (Boolean.FALSE.equals(usuario.getActivo())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "La cuenta se encuentra inactiva");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        usuarioRepository.save(usuario);
+    }
 }

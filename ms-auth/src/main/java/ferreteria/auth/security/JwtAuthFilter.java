@@ -28,6 +28,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/auth/login")
+                || path.equals("/api/auth/register")
+                || path.equals("/api/auth/reset-password");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -36,21 +44,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = header.substring(7);
-        if (!jwtService.isValid(token)) {
+        String token = header.substring(7).trim();
+        if (token.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String email = jwtService.extractEmail(token);
-        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
-        if (usuario != null && Boolean.TRUE.equals(usuario.getActivo())) {
-            var auth = new UsernamePasswordAuthenticationToken(
-                    usuario,
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            if (jwtService.isValid(token)
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String email = jwtService.extractEmail(token);
+                Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+                if (usuario != null && Boolean.TRUE.equals(usuario.getActivo())) {
+                    String rol = usuario.getRol() != null ? usuario.getRol().trim() : "USER";
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            usuario,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + rol))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            }
+        } catch (Exception ignored) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

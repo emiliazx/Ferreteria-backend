@@ -10,9 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Auth", description = "Registro, login y perfil")
+@Tag(name = "Auth", description = "Registro, login, recuperación y perfil")
 public class AuthController {
 
     private final AuthService authService;
@@ -32,6 +34,13 @@ public class AuthController {
     @Operation(summary = "Iniciar sesión y obtener JWT")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Restablecer contraseña para cualquier rol (ADMIN, VENDEDOR, USER)")
+    public Map<String, String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return Map.of("message", "Contraseña actualizada correctamente");
     }
 
     @GetMapping("/me")
