@@ -63,7 +63,47 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ferreteria-net
+
+  ordenes:
+    build: ./ordenes
+    container_name: ferreteria-ordenes
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ferreteria_ordenes?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: FerreteriaMaestrosSecretKey2026MuySeguraParaJWTHS256Tokens
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ferreteria-net
+
+  pagos:
+    build: ./pagos
+    container_name: ferreteria-pagos
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ferreteria_pagos?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: FerreteriaMaestrosSecretKey2026MuySeguraParaJWTHS256Tokens
     depends_on:
       mysql:
         condition: service_healthy
@@ -84,6 +124,8 @@ services:
       - eureka-server
       - auth-service
       - notificaciones
+      - ordenes
+      - pagos
     networks:
       - ferreteria-net
 
@@ -92,4 +134,5 @@ volumes:
 
 networks:
   ferreteria-net:
+    name: ferreteria-net
     driver: bridge
