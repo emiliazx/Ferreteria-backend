@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -48,4 +49,8 @@ public class AuthController {
     public UsuarioResponse me(@AuthenticationPrincipal Usuario usuario) {
         return authService.me(usuario.getEmail());
     }
+    @GetMapping("/usuarios")
+    public List<UsuarioResumenResponse> listarUsuarios() {
+    return authService.listarUsuarios();
+}
 }
