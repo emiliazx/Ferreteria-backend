@@ -63,7 +63,8 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
     depends_on:
       mysql:
         condition: service_healthy
@@ -136,3 +137,4 @@ networks:
   ferreteria-net:
     name: ferreteria-net
     driver: bridge
+

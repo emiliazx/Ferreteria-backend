@@ -29,6 +29,7 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
-  
-  resend:
-  api-key: ${RESEND_API_KEY:re_tu_api_key_aqui}
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from: ${RESEND_FROM_EMAIL:}
