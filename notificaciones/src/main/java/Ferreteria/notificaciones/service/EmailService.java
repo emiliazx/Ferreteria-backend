@@ -22,7 +22,7 @@ public class EmailService {
 
     public void enviar(String para, String asunto, String mensaje) {
         if (resend == null) {
-            log.debug("Envío de correo deshabilitado por falta de configuración");
+            log.debug("Envío de correo deshabilitado, por falta de configuración ");
             return;
         }
         try {
