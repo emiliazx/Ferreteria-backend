@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class AuthService {
 
@@ -25,11 +27,12 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
+        String emailNormalizado = request.getEmail().toLowerCase().trim();
+        if (usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
         }
         Usuario usuario = new Usuario();
-        usuario.setEmail(request.getEmail().toLowerCase().trim());
+        usuario.setEmail(emailNormalizado);
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         usuario.setNombre(request.getNombre().trim());
         usuario.setRol("USER");
@@ -60,5 +63,31 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         return new UsuarioResponse(usuario.getId(), usuario.getEmail(), usuario.getNombre(),
                 usuario.getRol(), usuario.getActivo());
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail().toLowerCase().trim())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No existe una cuenta registrada con ese correo"));
+
+        if (Boolean.FALSE.equals(usuario.getActivo())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "La cuenta se encuentra inactiva");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        usuarioRepository.save(usuario);
+    }
+
+    public List<UsuarioResumenResponse> listarUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(u -> UsuarioResumenResponse.builder()
+                        .id(u.getId())
+                        .nombre(u.getNombre() != null && !u.getNombre().isBlank() ? u.getNombre() : u.getEmail())
+                        .email(u.getEmail())
+                        .rol(u.getRol() != null && !u.getRol().isBlank() ? u.getRol() : "USER")
+                        .activo(u.getActivo() != null ? u.getActivo() : true)
+                        .build())
+                .toList();
     }
 }

@@ -13,7 +13,7 @@ Estos 3 servicios complementan los 5 originales:
 1. Copia las carpetas `cart-service`, `payment-service` y `notification-service` dentro de tu proyecto `ferreteria-microservices`.
 2. Agrega las bases en el script MySQL init:
    ```sql
-   CREATE DATABASE IF NOT EXISTS ferreteria_cart ...;
+   CREATE DATABASE IF NOhT EXISTS ferreteria_cart ...;
    CREATE DATABASE IF NOT EXISTS ferreteria_payment ...;
    CREATE DATABASE IF NOT EXISTS ferreteria_notification ...;
    ```
