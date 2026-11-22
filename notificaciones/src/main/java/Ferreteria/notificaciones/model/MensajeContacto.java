@@ -3,6 +3,8 @@ package Ferreteria.notificaciones.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "mensajes_contacto")
@@ -36,6 +38,16 @@ public class MensajeContacto {
 
     private LocalDateTime createdAt;
     private LocalDateTime respondidoAt;
+
+    @OneToMany(
+        mappedBy = "mensajeContacto",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.EAGER
+    )
+    @OrderBy("createdAt ASC, id ASC")
+    @Builder.Default
+    private List<MensajeContactoHilo> hilo = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

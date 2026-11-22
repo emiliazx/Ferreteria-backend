@@ -25,6 +25,15 @@ public class OrdenController {
     public OrdenResponse crear(@Valid @RequestBody CrearOrdenRequest request) {
         return service.crear(request);
     }
+    @GetMapping
+@Operation(summary = "Listar todas las órdenes (admin/vendedor)")
+public List<OrdenResponse> listarTodas(
+        @RequestParam(required = false) String estado) {
+    if (estado != null && !estado.isBlank()) {
+        return service.listarPorEstado(estado);
+    }
+    return service.listarTodas();
+}
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener orden por ID")

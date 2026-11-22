@@ -108,6 +108,19 @@ public class OrdenService {
         orden.setEstado("PAGADO");
         return toResponse(repository.save(orden));
     }
+    @Transactional(readOnly = true)
+public List<OrdenResponse> listarTodas() {
+    return repository.findAllByOrderByCreatedAtDesc().stream()
+            .map(this::toResponse)
+            .toList();
+}
+
+@Transactional(readOnly = true)
+public List<OrdenResponse> listarPorEstado(String estado) {
+    return repository.findByEstadoOrderByCreatedAtDesc(estado.toUpperCase()).stream()
+            .map(this::toResponse)
+            .toList();
+}
 
     private Orden findOrThrow(Long id) {
         return repository.findById(id)

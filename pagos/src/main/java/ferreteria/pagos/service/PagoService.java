@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -118,6 +118,12 @@ public class PagoService {
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comprobante no encontrado"));
     }
+    @Transactional(readOnly = true)
+public List<PagoResponse> listarTodos() {
+    return repository.findAllByOrderByFechaDesc().stream()
+            .map(this::toResponse)
+            .toList();
+}
 
     private void validarTarjeta(ProcesarPagoRequest req) {
         if (req.getNumeroTarjeta() == null || req.getNumeroTarjeta().isBlank()) {

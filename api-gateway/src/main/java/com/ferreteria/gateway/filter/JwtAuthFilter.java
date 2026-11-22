@@ -66,15 +66,25 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private boolean isPublic(String path, String method) {
         if ("OPTIONS".equalsIgnoreCase(method)) return true;
+
         if (path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
                 || path.startsWith("/api/auth/reset-password")) {
             return true;
         }
+
         if (path.startsWith("/api/notificaciones")) return true;
-        if ("GET".equalsIgnoreCase(method) && (path.startsWith("/api/productos") || path.startsWith("/api/categorias"))) {
+
+        // Checkout de invitado + paneles admin/vendedor
+        if (path.startsWith("/api/ordenes") || path.startsWith("/api/pagos")) {
             return true;
         }
+
+        if ("GET".equalsIgnoreCase(method)
+                && (path.startsWith("/api/productos") || path.startsWith("/api/categorias"))) {
+            return true;
+        }
+
         return false;
     }
 

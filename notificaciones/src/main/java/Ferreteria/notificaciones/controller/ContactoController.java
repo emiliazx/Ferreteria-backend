@@ -2,6 +2,7 @@ package Ferreteria.notificaciones.controller;
 
 import Ferreteria.notificaciones.dto.ContactoRequest;
 import Ferreteria.notificaciones.dto.ResponderContactoRequest;
+import Ferreteria.notificaciones.dto.SeguimientoContactoRequest;
 import Ferreteria.notificaciones.model.MensajeContacto;
 import Ferreteria.notificaciones.service.ContactoService;
 import jakarta.validation.Valid;
@@ -34,5 +35,13 @@ public class ContactoController {
             @PathVariable Long id,
             @Valid @RequestBody ResponderContactoRequest req) {
         return contactoService.responderMensaje(id, req.getRespuesta());
+    }
+
+    @PostMapping("/{id}/mensajes")
+    public ResponseEntity<MensajeContacto> agregarMensaje(
+            @PathVariable Long id,
+            @Valid @RequestBody SeguimientoContactoRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(contactoService.agregarMensajeHilo(id, req.getRemitente(), req.getTexto()));
     }
 }

@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface PagoRepository extends JpaRepository<Pago, Long> {
     List<Pago> findByOrdenIdOrderByFechaDesc(Long ordenId);
     Optional<Pago> findByComprobante(String comprobante);
+    List<Pago> findAllByOrderByFechaDesc();
 }

@@ -26,6 +26,11 @@ public class PagoController {
     public PagoResponse procesar(@Valid @RequestBody ProcesarPagoRequest request) {
         return service.procesar(request);
     }
+    @GetMapping
+@Operation(summary = "Listar todos los pagos (admin/vendedor)")
+public List<PagoResponse> listarTodos() {
+    return service.listarTodos();
+}
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener pago por ID")
