@@ -7,6 +7,7 @@ services:
       MYSQL_ROOT_HOST: "%"
     ports:
       - "3307:3306"
+    
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d
@@ -49,6 +50,47 @@ services:
       mysql:
         condition: service_healthy
       eureka-server:
+        condition: service_started
+    networks:
+      - ferreteria-net
+
+  productos:
+    build: ./productos
+    container_name: ferreteria-productos
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ferreteria_productos?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: FerreteriaMaestrosSecretKey2026MuySeguraParaJWTHS256Tokens
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ferreteria-net
+
+  carrito:
+    build: ./carrito
+    container_name: ferreteria-carrito
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ferreteria_carrito?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: FerreteriaMaestrosSecretKey2026MuySeguraParaJWTHS256Tokens
+      PRODUCTOS_SERVICE_URL: http://productos:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      productos:
         condition: service_started
     networks:
       - ferreteria-net
@@ -124,6 +166,8 @@ services:
     depends_on:
       - eureka-server
       - auth-service
+      - productos
+      - carrito
       - notificaciones
       - ordenes
       - pagos
@@ -137,4 +181,3 @@ networks:
   ferreteria-net:
     name: ferreteria-net
     driver: bridge
-
