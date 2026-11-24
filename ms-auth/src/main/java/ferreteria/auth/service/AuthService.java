@@ -27,10 +27,21 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        if (request == null || request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El correo es obligatorio");
+        }
+        if (request.getNombre() == null || request.getNombre().trim().length() < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre debe tener al menos 2 caracteres");
+        }
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña debe tener al menos 6 caracteres");
+        }
+
         String emailNormalizado = request.getEmail().toLowerCase().trim();
         if (usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
         }
+
         Usuario usuario = new Usuario();
         usuario.setEmail(emailNormalizado);
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -44,6 +55,11 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        if (request == null || request.getEmail() == null || request.getEmail().isBlank()
+                || request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes ingresar correo y contraseña");
+        }
+
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail().toLowerCase().trim())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
 
@@ -59,20 +75,37 @@ public class AuthService {
     }
 
     public UsuarioResponse me(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sesión no válida");
+        }
+        Usuario usuario = usuarioRepository.findByEmail(email.toLowerCase().trim())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         return new UsuarioResponse(usuario.getId(), usuario.getEmail(), usuario.getNombre(),
                 usuario.getRol(), usuario.getActivo());
     }
 
     public void resetPassword(ResetPasswordRequest request) {
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail().toLowerCase().trim())
+        if (request == null || request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes ingresar un correo válido");
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La nueva contraseña debe tener al menos 6 caracteres");
+        }
+
+        String emailNormalizado = request.getEmail().toLowerCase().trim();
+        Usuario usuario = usuarioRepository.findByEmail(emailNormalizado)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "No existe una cuenta registrada con ese correo"));
 
         if (Boolean.FALSE.equals(usuario.getActivo())) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "La cuenta se encuentra inactiva");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), usuario.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La nueva contraseña no puede ser igual a la actual");
         }
 
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
